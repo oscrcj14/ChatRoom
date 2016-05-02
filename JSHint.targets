@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <!-- would like to support incrmental builds, but NTVS is running builds repeatedly on project load and other places
+       which would break this so  run JSHint every time instead. -->
+  <!-- <PropertyGroup>
+    <JSHintTouchFile>obj\jshintRunFile</JSHintTouchFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <JSHintFiles Include="test\**\*.js" />
+    <JSHintFiles Include="lib\**\*.js" />
+  </ItemGroup>
+  <Target Name="JSHint" AfterTargets="InstallNodeModules" Inputs="@(JSHintFiles)" Outputs="$(JSHintTouchFile)"> -->
+  <Target Name="JSHint" AfterTargets="PrepareForBuild">
+    <Exec Command="node_modules\.bin\jshint --reporter=lib\common\vsreporter.js test lib" />
+    <Touch Files="$(JSHintTouchFile)" AlwaysCreate="true" />
+    <!-- Debugging: -->
+    <!-- <WriteLinesToFile File="obj\Writting.txt" Lines="$([System.DateTime]::Now.ToString(`yyyy.MMdd`))" /> -->
+  </Target>
+</Project>

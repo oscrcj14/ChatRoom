@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Target Name="InstallNodeModules" AfterTargets="PrepareForBuild">
+    <!-- we have to look at package.json to see if modules should be loaded. Ideally we'd just run npm/flatten always, but that is to slow -->
+    <ReadLinesFromFile File="package.json">
+        <Output TaskParameter="Lines" PropertyName="Lines" />
+    </ReadLinesFromFile>
+    
+    <PropertyGroup>
+      <AllDepBlocks>$([System.Text.RegularExpressions.Regex]::Matches($(Lines), `ependencies"\s*:\s*{([^}]*)}*`))</AllDepBlocks>
+      <DepLines>$([System.Text.RegularExpressions.Regex]::Matches($(AllDepBlocks), `"[^}{"]+"\s*:`))</DepLines>
+      <DepPackageNames>$([System.Text.RegularExpressions.Regex]::Matches($(DepLines), `[^}{:\s;"]+`))</DepPackageNames>
+    </PropertyGroup>
+            
+    <ItemGroup>
+      <RequiredModules Include="$(DepPackageNames)" />
+      <MissingModules Include="@(RequiredModules)" Condition="!Exists ( '.\node_modules\%(Identity)' )"/>
+    </ItemGroup>
+       
+    <PropertyGroup>
+      <ShouldGetModules>False</ShouldGetModules>
+      <ShouldGetModules Condition="'@(MissingModules)' != ''">True</ShouldGetModules>
+    </PropertyGroup>
+    <Message Condition="$(ShouldGetModules) == 'True'" Text="Missing modules found from $(MSBuildProjectDirectory)\package.json: @(MissingModules)" Importance="high"/>
+            
+    <!--
+    IgnoreStandardErrorWarningFormat is used to ignore the special formatting of errors/warnings produced by npm install,
+    which happens because some node modules produce errors when their installation invokes gyp. Note that failures
+    still cause the build to fail; this only disables the special formatting which causes noise in the build logs.
+    -->
+    <Exec Condition="$(ShouldGetModules) == 'True'" Command="npm install --cache=./.npm_cache --no-color" IgnoreStandardErrorWarningFormat="true" />
+    <MakeDir Condition="$(ShouldGetModules) == 'True' AND $(FlattenNpmPackages) == 'True'" Directories="flatten\node_modules" />
+    <Exec Condition="$(ShouldGetModules) == 'True' AND $(FlattenNpmPackages) == 'True'" Command="npm install flatten-packages --cache=./.npm_cache --no-color" IgnoreStandardErrorWarningFormat="true" WorkingDirectory="flatten" />
+    <Exec Condition="$(ShouldGetModules) == 'True' AND $(FlattenNpmPackages) == 'True'" Command="node flatten\node_modules\flatten-packages\bin\flatten" IgnoreStandardErrorWarningFormat="true" />
+  </Target>
+</Project>
