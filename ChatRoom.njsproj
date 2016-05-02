@@ -4,7 +4,7 @@
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <Name>ChatRoom</Name>
-    <RootNamespace>DataflowServiceN</RootNamespace>
+    <RootNamespace>ChatRoom</RootNamespace>
     <Disable_CopyWebApplication>True</Disable_CopyWebApplication>
     <NameOfLastUsedPublishProfile>Local</NameOfLastUsedPublishProfile>
   </PropertyGroup>
@@ -46,11 +46,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="package.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <AppSettings Include="DataflowSettings.*.xml">
-      <InProject>false</InProject>
-    </AppSettings>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="lib\" />
